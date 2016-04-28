@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 public class server_frame extends javax.swing.JFrame {
 
     ArrayList clientOutputStreams;
-    ArrayList<String> users;
+ public static ArrayList<String> users;
     ServerSocket serverSocket;
 
     public class ClientHandler implements Runnable {
@@ -45,6 +45,7 @@ public class server_frame extends javax.swing.JFrame {
             try {
                 while ((message = reader.readLine()) != null) {
                     ta_chat.append("Received: " + message + "\n");
+                    //ตัดคำ ถ้าเจอ :
                     data = message.split(":");
 
                     for (String token : data) {
@@ -128,20 +129,23 @@ public class server_frame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(20, 20, 20)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tf_port, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
-                .addComponent(b_start, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(b_stop, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(20, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel3)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)))
+                        .addContainerGap(25, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(tf_port, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(26, 26, 26)
+                        .addComponent(b_start, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(b_stop, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -160,9 +164,9 @@ public class server_frame extends javax.swing.JFrame {
                             .addComponent(b_start, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -236,14 +240,7 @@ public class server_frame extends javax.swing.JFrame {
                     //  create list users
                     PrintWriter writer = new PrintWriter(clientSock.getOutputStream());
                     clientOutputStreams.add(writer);
-                    
-//                    ta_chat.append("\n Online users : \n");
-//                    for (String current_user : users) {
-//                        ta_users.append(current_user);
-//                        ta_users.append("\n");
-//                    }
-                    
-                    
+        
                     Thread listener = new Thread(new ClientHandler(clientSock, writer));
                     listener.start();
                     
@@ -257,6 +254,8 @@ public class server_frame extends javax.swing.JFrame {
         }
     }
 
+ 
+    
     public void userAdd(String data) {
         String message, add = ": :Connect", done = "Server: :Done", name = data;
         ta_chat.append("Before " + name + " added. \n");
@@ -284,7 +283,9 @@ public class server_frame extends javax.swing.JFrame {
         }
         tellEveryone(done);
     }
+    
 
+    //ใช้ติดต่อระหว่าง Server กับ Client
     public void tellEveryone(String message) {
         Iterator it = clientOutputStreams.iterator();
 
@@ -295,11 +296,15 @@ public class server_frame extends javax.swing.JFrame {
                 ta_chat.append("Sending: " + message + "\n");
                 writer.flush();
                 ta_chat.setCaretPosition(ta_chat.getDocument().getLength());
+                
 
             } catch (Exception ex) {
                 ta_chat.append("Error telling everyone. \n");
             }
         }
+        
+        
+        
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
